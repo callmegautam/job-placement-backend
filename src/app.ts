@@ -1,12 +1,27 @@
-import { z } from 'zod';
+import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import env from './config/env';
 
-const schema = z.object({
-    NODE_ENV: z.enum(['DEVELOPMENT', 'PRODUCTION']),
-    PORT: z.number(),
-    DB_HOST: z.string(),
-    DB_USER: z.string(),
-    DB_PASSWORD: z.string(),
-    DB_NAME: z.string(),
-    JWT_SECRET: z.string(),
-    JWT_EXPIRY: z.number(),
+const app = express();
+
+app.use(
+    cors({
+        origin: env.CORS_ORIGIN,
+        credentials: true,
+    })
+);
+app.use(express.json());
+app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+app.get('/healthcheck', (_, res) => {
+    res.status(200).send('OK').json({
+        success: true,
+        message: 'Server is running',
+        data: null,
+    });
 });
+
+export { app };

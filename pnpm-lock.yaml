@@ -60,6 +60,9 @@ importers:
       drizzle-kit:
         specifier: ^0.31.0
         version: 0.31.0
+      ts-alias:
+        specifier: ^0.0.7
+        version: 0.0.7
       tsx:
         specifier: ^4.19.3
         version: 4.19.3
@@ -793,6 +796,11 @@ packages:
     resolution: {integrity: sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg==}
     engines: {node: '>=8'}
 
+  json5@2.2.3:
+    resolution: {integrity: sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==}
+    engines: {node: '>=6'}
+    hasBin: true
+
   jsonwebtoken@9.0.2:
     resolution: {integrity: sha512-PRp66vJ865SSqOlgqS8hujT5U4AOgMfhrwYIuIhfKaoSCZcirrmASQr8CX7cUg+RMih+hgznrjp99o+W4pJLHQ==}
     engines: {node: '>=12', npm: '>=6'}
@@ -1140,6 +1148,9 @@ packages:
 
   tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
+
+  ts-alias@0.0.7:
+    resolution: {integrity: sha512-N4lWQLgmb873yQWqWIdHM+CMRIq+bfqFyme+CZ324RSL7hKOfVrg7GtUgkBSJyIEw8w+byN+ZI0mkB7PRp6XwA==}
 
   tsx@4.19.3:
     resolution: {integrity: sha512-4H8vUNGNjQ4V2EOoGw005+c+dGuPSnhpPBPHBtsZdGZBk/iJb4kguGlPWaZTZ3q5nMtFOEsY0nRDlh9PJyd6SQ==}
@@ -1803,6 +1814,8 @@ snapshots:
 
   is-fullwidth-code-point@3.0.0: {}
 
+  json5@2.2.3: {}
+
   jsonwebtoken@9.0.2:
     dependencies:
       jws: 3.2.2
@@ -2144,6 +2157,10 @@ snapshots:
   toidentifier@1.0.1: {}
 
   tr46@0.0.3: {}
+
+  ts-alias@0.0.7:
+    dependencies:
+      json5: 2.2.3
 
   tsx@4.19.3:
     dependencies:

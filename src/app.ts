@@ -4,7 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import env from './config/env';
 import morgan from 'morgan';
-import { globalErrorHandler } from './middlewares/error-handler.middleware';
+import globalErrorHandler from './middlewares/error-handler.middleware';
 
 const app = express();
 

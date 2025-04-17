@@ -22,7 +22,7 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.get('/', (req: Request, res: Response) => {
+app.get('/', (_: Request, res: Response) => {
     return res.status(200).json({
         success: true,
         message: 'Server is running',
@@ -30,7 +30,7 @@ app.get('/', (req: Request, res: Response) => {
     });
 });
 
-app.all('*', (req: Request, res: Response) => {
+app.all('*', (_: Request, res: Response) => {
     return res.status(404).json({
         success: false,
         message: 'Not Found',

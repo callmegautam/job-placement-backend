@@ -1,0 +1,28 @@
+{
+    "name": "niyukti-backend",
+    "version": "1.0.0",
+    "description": "",
+    "main": "src/index.js",
+    "scripts": {
+        "dev": "nodemon --watch src --exec ts-node src/index.ts"
+    },
+    "keywords": [],
+    "author": "Gautam Suthar <iamgautamsuthar@outlook.com> (https://github.com/callmegautam)",
+    "license": "ISC",
+    "packageManager": "pnpm@10.8.1",
+    "dependencies": {
+        "bcrypt": "^5.1.1",
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.5",
+        "dotenv": "^16.5.0",
+        "express": "^5.1.0",
+        "jsonwebtoken": "^9.0.2",
+        "zod": "^3.24.3"
+    },
+    "devDependencies": {
+        "@types/node": "^22.14.1",
+        "nodemon": "^3.1.9",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.8.3"
+    }
+}

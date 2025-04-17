@@ -40,14 +40,8 @@ export const company = pgTable(
         updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
     },
     (table) => [
-        uniqueIndex('Company_domain_key').using(
-            'btree',
-            table.domain.asc().nullsLast().op('text_ops')
-        ),
-        uniqueIndex('Company_email_key').using(
-            'btree',
-            table.email.asc().nullsLast().op('text_ops')
-        ),
+        uniqueIndex('Company_domain_key').using('btree', table.domain.asc().nullsLast().op('text_ops')),
+        uniqueIndex('Company_email_key').using('btree', table.email.asc().nullsLast().op('text_ops')),
     ]
 );
 
@@ -73,20 +67,12 @@ export const student = pgTable(
         githubUrl: text(),
         resumeUrl: text(),
         avatarUrl: text(),
-        createdAt: timestamp({ precision: 3, mode: 'string' })
-            .default(sql`CURRENT_TIMESTAMP`)
-            .notNull(),
-        updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
+        createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`),
+        updatedAt: timestamp({ precision: 3, mode: 'string' }),
     },
     (table) => [
-        uniqueIndex('Student_email_key').using(
-            'btree',
-            table.email.asc().nullsLast().op('text_ops')
-        ),
-        uniqueIndex('Student_username_key').using(
-            'btree',
-            table.username.asc().nullsLast().op('text_ops')
-        ),
+        uniqueIndex('Student_email_key').using('btree', table.email.asc().nullsLast().op('text_ops')),
+        uniqueIndex('Student_username_key').using('btree', table.username.asc().nullsLast().op('text_ops')),
         foreignKey({
             columns: [table.collegeId],
             foreignColumns: [college.id],

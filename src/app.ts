@@ -38,6 +38,10 @@ app.all('*', (_: Request, res: Response) => {
     });
 });
 
+// Routes
+import userRoute from './routes/user.route';
+app.use('/api/v1/users', userRoute);
+
 app.use(globalErrorHandler);
 
 export { app };

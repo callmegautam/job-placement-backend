@@ -3,7 +3,7 @@
         "checkJs": true,
         "target": "ESNext",
         "module": "ESNext",
-        "rootDir": "./src",
+        "rootDir": "./",
         "outDir": "./dist",
         "esModuleInterop": true,
         "strict": true,

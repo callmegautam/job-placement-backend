@@ -4,7 +4,9 @@
     "description": "",
     "main": "src/index.js",
     "scripts": {
-        "dev": "tsx --watch -r dotenv/config src/index.ts"
+        "dev": "tsx --watch -r dotenv/config src/index.ts",
+        "build": "tsx -r dotenv/config src/index.ts",
+        "db:push": "drizzle-kit push"
     },
     "keywords": [],
     "author": "Gautam Suthar <iamgautamsuthar@outlook.com> (https://github.com/callmegautam)",
@@ -28,8 +30,6 @@
         "@types/node": "^22.14.1",
         "@types/pg": "^8.11.13",
         "drizzle-kit": "^0.31.0",
-        "nodemon": "^3.1.9",
-        "ts-node": "^10.9.2",
         "tsx": "^4.19.3",
         "typescript": "^5.8.3"
     }

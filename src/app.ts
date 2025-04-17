@@ -1,4 +1,5 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
+import { Request, Response } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import env from './config/env';
@@ -21,16 +22,16 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.get('/', (_: Request, res: Response) => {
-    res.status(200).send('OK').json({
+app.get('/', (req: Request, res: Response) => {
+    return res.status(200).json({
         success: true,
         message: 'Server is running',
         data: null,
     });
 });
 
-app.use('*', (req: Request, res: Response) => {
-    res.status(404).send('Not Found').json({
+app.all('*', (req: Request, res: Response) => {
+    return res.status(404).json({
         success: false,
         message: 'Not Found',
         data: null,

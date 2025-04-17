@@ -36,7 +36,6 @@ export const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = loginUserSchema.parse(req.body);
 
     const user = await db.select().from(student).where(eq(student.email, email));
-    console.log(user);
 
     if (user.length === 0) {
         return res.status(400).json({ success: false, message: 'User not found', data: null });
@@ -58,4 +57,9 @@ export const loginUser = asyncHandler(async (req, res) => {
         data: userDataWithoutPassword,
         token,
     });
+});
+
+export const logoutUser = asyncHandler(async (_, res) => {
+    res.clearCookie('authorization');
+    return res.status(200).json({ success: true, message: 'User logged out successfully', data: null });
 });

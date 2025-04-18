@@ -63,3 +63,10 @@ export const logoutUser = asyncHandler(async (_, res) => {
     res.clearCookie('authorization');
     return res.status(200).json({ success: true, message: 'User logged out successfully', data: null });
 });
+
+// TODO remove password from returning data
+
+export const getUsers = asyncHandler(async (_, res) => {
+    const users = await db.select().from(student);
+    return res.status(200).json({ success: true, message: 'Users fetched successfully', data: users });
+});

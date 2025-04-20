@@ -9,4 +9,5 @@ router.post('/login', UserController.loginUser);
 router.post('/logout', UserController.logoutUser);
 router.post('/update', UserController.updateUser);
 router.get('/:id', UserController.getUserById);
+router.get('/:username', UserController.getUserByUsername);
 export default router;

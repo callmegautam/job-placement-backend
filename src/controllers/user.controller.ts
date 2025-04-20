@@ -160,3 +160,16 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
         data: null,
     });
 });
+
+export const getUserByUsername = asyncHandler(async (req: Request, res: Response) => {
+    const username = req.params?.username;
+    if (!username) {
+        return res.status(400).json({
+            success: false,
+            message: 'Username is required',
+            data: null,
+        });
+    }
+    const [user] = await db.select().from(student).where(eq(student.username, username));
+    return res.status(200).json({ success: true, message: 'User fetched successfully', data: user });
+});

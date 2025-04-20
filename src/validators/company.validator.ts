@@ -26,3 +26,16 @@ export const loginCompanySchema = z.object({
         .min(6, 'Password must be at least 6 characters')
         .max(100, 'Password is too long'),
 });
+
+export const updateCompanySchema = z.object({
+    email: z.string().email(),
+    companyName: z.string().min(2),
+    domain: z.string().min(2),
+    description: z.string().optional(),
+    website: z.string().url().optional(),
+    address: z.string().optional(),
+    linkedinUrl: z.string().url().optional(),
+    logoUrl: z.string().url().optional(),
+    isVerified: z.boolean().optional(),
+    verificationStatus: z.enum(['PENDING', 'VERIFIED', 'REJECTED']).optional(),
+});

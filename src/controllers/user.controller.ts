@@ -81,6 +81,7 @@ export const getUserById = asyncHandler(async (req: Request, res: Response) => {
         return res.status(400).json({ success: false, message: 'User id is not a number', data: null });
     }
     const [user] = await db.select().from(student).where(eq(student.id, id));
+    const { password: _, ...userData } = user;
     return res.status(200).json({ success: true, message: 'User fetched successfully', data: user });
 });
 
@@ -137,7 +138,7 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
         });
     }
 
-    await db
+    const [userData] = await db
         .update(student)
         .set({
             name,
@@ -152,12 +153,13 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
             resumeUrl,
             avatarUrl,
         })
-        .where(eq(student.id, id));
+        .where(eq(student.id, id))
+        .returning();
 
     return res.status(200).json({
         success: true,
         message: 'User updated successfully',
-        data: null,
+        data: userData,
     });
 });
 
@@ -171,5 +173,6 @@ export const getUserByUsername = asyncHandler(async (req: Request, res: Response
         });
     }
     const [user] = await db.select().from(student).where(eq(student.username, username));
-    return res.status(200).json({ success: true, message: 'User fetched successfully', data: user });
+    const { password: _, ...userData } = user;
+    return res.status(200).json({ success: true, message: 'User fetched successfully', data: userData });
 });

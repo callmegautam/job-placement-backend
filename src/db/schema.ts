@@ -34,10 +34,8 @@ export const company = pgTable(
         logoUrl: text(),
         isVerified: boolean().default(false).notNull(),
         verificationStatus: verificationStatus().default('PENDING').notNull(),
-        createdAt: timestamp({ precision: 3, mode: 'string' })
-            .default(sql`CURRENT_TIMESTAMP`)
-            .notNull(),
-        updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
+        createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`),
+        updatedAt: timestamp({ precision: 3, mode: 'string' }),
     },
     (table) => [
         uniqueIndex('Company_domain_key').using('btree', table.domain.asc().nullsLast().op('text_ops')),

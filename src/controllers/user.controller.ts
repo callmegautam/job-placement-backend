@@ -68,5 +68,8 @@ export const logoutUser = asyncHandler(async (_, res) => {
 
 export const getUsers = asyncHandler(async (_, res) => {
     const users = await db.select().from(student);
-    return res.status(200).json({ success: true, message: 'Users fetched successfully', data: users });
+    const usersWithOutPassword = users.map(({ password, ...user }) => user);
+    return res
+        .status(200)
+        .json({ success: true, message: 'Users fetched successfully', data: usersWithOutPassword });
 });

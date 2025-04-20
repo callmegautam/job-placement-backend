@@ -56,7 +56,7 @@ export const updateUserSchema = z.object({
         .max(50, 'Course is too long'),
 
     collegeId: z
-        .string({ required_error: 'CollegeId is required' })
+        .number({ required_error: 'CollegeId is required' })
         .min(1, 'CollegeId cannot be empty')
         .max(50, 'CollegeId is too long'),
 
@@ -75,9 +75,9 @@ export const updateUserSchema = z.object({
         .url('AvatarUrl must be a valid URL')
         .max(MAX_URL_LENGTH, `AvatarUrl is too long (max ${MAX_URL_LENGTH} characters)`),
 
-    admissionYear: z.string({ required_error: 'AdmissionYear is required' }),
+    admissionYear: z.number({ required_error: 'AdmissionYear is required' }),
 
-    currentYear: z.string({ required_error: 'CurrentYear is required' }),
+    currentYear: z.number({ required_error: 'CurrentYear is required' }),
 
-    gradYear: z.string({ required_error: 'GradYear is required' }),
+    gradYear: z.number({ required_error: 'GradYear is required' }),
 });

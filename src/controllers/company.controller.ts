@@ -9,49 +9,38 @@ import {
     loginCompanySchema,
     updateCompanySchema,
 } from '@/validators/company.validator';
-import { and, eq, or, sql } from 'drizzle-orm';
+import { and, eq, is, or, sql } from 'drizzle-orm';
+import { isCompanyExist, isEmailOrDomainTaken } from '@/utils/db';
+import { removePassword } from '@/utils/others';
 
 export const registerCompany = asyncHandler(async (req: Request, res: Response) => {
-    const { email, password, companyName, domain } = registerCompanySchema.parse(req.body);
+    const data = registerCompanySchema.parse(req.body);
 
-    const existing = await db
-        .select()
-        .from(company)
-        .where(or(eq(company.email, email), eq(company.domain, domain)));
+    const existingCompany = await isCompanyExist(data.email, data.domain);
 
-    if (existing.length > 0) {
-        return res.status(400).json({
+    if (existingCompany) {
+        return res.status(409).json({
             success: false,
-            message: 'Company already exists',
+            message: 'Email or domain is already used by another company',
             data: null,
         });
     }
 
-    const [newCompany] = await db
-        .insert(company)
-        .values({
-            email,
-            password,
-            companyName,
-            domain,
-        })
-        .returning();
-
-    const { password: _, ...companyData } = newCompany;
+    const newCompany = await db.insert(company).values(data).returning();
 
     return res.status(200).json({
         success: true,
         message: 'Company registered successfully',
-        data: companyData,
+        data: removePassword(newCompany[0]),
     });
 });
 
 export const loginCompany = asyncHandler(async (req: Request, res: Response) => {
-    const { email, password } = loginCompanySchema.parse(req.body);
+    const data = loginCompanySchema.parse(req.body);
 
-    const [companyData] = await db.select().from(company).where(eq(company.email, email));
+    const existingCompany = await isCompanyExist(data.email, '');
 
-    if (!companyData) {
+    if (!existingCompany) {
         return res.status(400).json({
             success: false,
             message: 'Company not found',
@@ -59,7 +48,7 @@ export const loginCompany = asyncHandler(async (req: Request, res: Response) => 
         });
     }
 
-    if (companyData.password !== password) {
+    if (existingCompany.password !== data.password) {
         return res.status(400).json({
             success: false,
             message: 'Invalid credentials',
@@ -67,16 +56,17 @@ export const loginCompany = asyncHandler(async (req: Request, res: Response) => 
         });
     }
 
-    const token = generateToken({ id: companyData.id, role: 'COMPANY' });
+    const token = generateToken({ id: existingCompany.id, role: 'COMPANY' });
 
-    const { password: _, ...companyWithoutPassword } = companyData;
-
-    return res.status(200).cookie('authorization', token, cookieOptions).json({
-        success: true,
-        message: 'Company logged in successfully',
-        data: companyWithoutPassword,
-        token,
-    });
+    return res
+        .status(200)
+        .cookie('authorization', token, cookieOptions)
+        .json({
+            success: true,
+            message: 'Company logged in successfully',
+            data: removePassword(existingCompany),
+            token,
+        });
 });
 
 export const logoutCompany = asyncHandler(async (req: Request, res: Response) => {
@@ -100,17 +90,17 @@ export const getCompanies = asyncHandler(async (req: Request, res: Response) => 
 
 export const getCompanyById = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params?.id);
-    if (!id || isNaN(id)) {
+    if (isNaN(id) || !id) {
         return res.status(400).json({
             success: false,
-            message: 'Valid company ID is required',
+            message: 'Valid company id is required',
             data: null,
         });
     }
 
-    const [companyData] = await db.select().from(company).where(eq(company.id, id));
+    const companies = await db.select().from(company).where(eq(company.id, id));
 
-    if (!companyData) {
+    if (companies.length === 0) {
         return res.status(404).json({
             success: false,
             message: 'Company not found',
@@ -118,12 +108,10 @@ export const getCompanyById = asyncHandler(async (req: Request, res: Response) =
         });
     }
 
-    const { password: _, ...companyDataWithoutPassword } = companyData;
-
     return res.status(200).json({
         success: true,
         message: 'Company fetched successfully',
-        data: companyDataWithoutPassword,
+        data: removePassword(companies[0]),
     });
 });
 
@@ -137,22 +125,11 @@ export const updateCompany = asyncHandler(async (req: Request, res: Response) =>
         });
     }
 
-    const {
-        email,
-        companyName,
-        domain,
-        description,
-        website,
-        address,
-        linkedinUrl,
-        logoUrl,
-        isVerified,
-        verificationStatus,
-    } = updateCompanySchema.parse(req.body);
+    const data = updateCompanySchema.parse(req.body);
 
-    const [companyData] = await db.select().from(company).where(eq(company.id, id));
+    const companies = await db.select().from(company).where(eq(company.id, id));
 
-    if (!companyData) {
+    if (companies.length === 0) {
         return res.status(404).json({
             success: false,
             message: 'Company not found',
@@ -160,17 +137,9 @@ export const updateCompany = asyncHandler(async (req: Request, res: Response) =>
         });
     }
 
-    const existing = await db
-        .select()
-        .from(company)
-        .where(
-            or(
-                and(eq(company.email, email), sql`${company.id} != ${id}`),
-                and(eq(company.domain, domain), sql`${company.id} != ${id}`)
-            )
-        );
+    const existingCompany = await isEmailOrDomainTaken(data.email, data.domain, id);
 
-    if (existing.length > 0) {
+    if (existingCompany.length > 0) {
         return res.status(409).json({
             success: false,
             message: 'Email or domain is already used by another company',
@@ -178,26 +147,11 @@ export const updateCompany = asyncHandler(async (req: Request, res: Response) =>
         });
     }
 
-    const [newCompanyData] = await db
-        .update(company)
-        .set({
-            email,
-            companyName,
-            domain,
-            description,
-            website,
-            address,
-            linkedinUrl,
-            logoUrl,
-            isVerified,
-            verificationStatus,
-        })
-        .where(eq(company.id, id))
-        .returning();
+    const updatedCompany = await db.update(company).set(data).where(eq(company.id, id)).returning();
 
     return res.status(200).json({
         success: true,
         message: 'Company updated successfully',
-        data: newCompanyData,
+        data: updatedCompany,
     });
 });

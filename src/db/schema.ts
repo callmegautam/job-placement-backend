@@ -8,6 +8,7 @@ import {
     foreignKey,
     integer,
     pgEnum,
+    primaryKey,
 } from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
 
@@ -22,6 +23,33 @@ export const verificationStatus = pgEnum('VerificationStatus', [
 export const jobType = pgEnum('JobType', ['FULL_TIME', 'PART_TIME', 'INTERNSHIP', 'CONTRACT']);
 export const jobMode = pgEnum('JobMode', ['REMOTE', 'ONSITE', 'HYBRID']);
 export const course = pgEnum('Course', ['BCA', 'BSc_CS', 'BTech', 'MCA', 'MTech', 'Diploma_CS', 'Other']);
+export const skillsEnum = pgEnum('Skill', [
+    'C',
+    'C++',
+    'Python',
+    'JavaScript',
+    'TypeScript',
+    'NodeJS',
+    'ReactJS',
+    'NextJS',
+    'TailwindCSS',
+    'HTML',
+    'CSS',
+    'SQL',
+    'MongoDB',
+    'PostgreSQL',
+    'ExpressJS',
+    'Django',
+    'Flask',
+    'AWS',
+    'Docker',
+    'Git',
+    'Figma',
+    'Java',
+    'GoLang',
+    'Rust',
+    'Other',
+]);
 
 export const company = pgTable(
     'company',
@@ -108,6 +136,42 @@ export const job = pgTable(
             .onUpdate('cascade')
             .onDelete('cascade'),
     ]
+);
+
+export const jobSkill = pgTable(
+    'jobSkill',
+    {
+        jobId: integer().notNull(),
+        skill: skillsEnum(),
+    },
+    (table) => ({
+        pk: primaryKey({ columns: [table.jobId, table.skill] }),
+        fk_job: foreignKey({
+            columns: [table.jobId],
+            foreignColumns: [job.id],
+            name: 'jobSkill_jobId_fkey',
+        })
+            .onUpdate('cascade')
+            .onDelete('cascade'),
+    })
+);
+
+export const studentSkill = pgTable(
+    'studentSkill',
+    {
+        studentId: integer().notNull(),
+        skill: skillsEnum(),
+    },
+    (table) => ({
+        pk: primaryKey({ columns: [table.studentId, table.skill] }),
+        fk_student: foreignKey({
+            columns: [table.studentId],
+            foreignColumns: [student.id],
+            name: 'studentSkill_studentId_fkey',
+        })
+            .onUpdate('cascade')
+            .onDelete('cascade'),
+    })
 );
 
 // export const studentRelations = relations(student, ({ one }) => ({

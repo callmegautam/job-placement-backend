@@ -33,10 +33,10 @@ app.get('/', (_: Request, res: Response) => {
 // Routes
 import userRoute from './routes/user.route';
 import companyRoute from './routes/company.route';
+import skillRoute from './routes/skill.route';
 app.use('/api/v1/users', userRoute);
 app.use('/api/v1/companies', companyRoute);
-// app.use('/api/v1/jobs', userRoute);
-// app.use('/api/v1/skills', userRoute);
+app.use('/api/v1/skills', skillRoute);
 
 app.use('*', (_: Request, res: Response) => {
     return res.status(404).json({

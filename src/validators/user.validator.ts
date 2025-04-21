@@ -1,3 +1,4 @@
+import { course } from '@/db/schema';
 import { z } from 'zod';
 
 const MAX_URL_LENGTH = 200;
@@ -50,10 +51,7 @@ export const updateUserSchema = z.object({
         .min(6, 'Password must be at least 6 characters')
         .max(100, 'Password is too long'),
 
-    course: z
-        .string({ required_error: 'Course is required' })
-        .min(1, 'Course cannot be empty')
-        .max(50, 'Course is too long'),
+    course: z.enum(course.enumValues),
 
     collegeId: z
         .number({ required_error: 'CollegeId is required' })

@@ -19,6 +19,10 @@ export const verificationStatus = pgEnum('VerificationStatus', [
     'REJECTED',
 ]);
 
+export const jobType = pgEnum('JobType', ['FULL_TIME', 'PART_TIME', 'INTERNSHIP', 'CONTRACT']);
+export const jobMode = pgEnum('JobMode', ['REMOTE', 'ONSITE', 'HYBRID']);
+export const course = pgEnum('Course', ['BCA', 'BSc_CS', 'BTech', 'MCA', 'MTech', 'Diploma_CS', 'Other']);
+
 export const company = pgTable(
     'company',
     {
@@ -57,7 +61,7 @@ export const student = pgTable(
         password: text().notNull(),
         username: text().notNull(),
         name: text().notNull(),
-        course: text(),
+        course: course(),
         admissionYear: integer(),
         currentYear: integer(),
         gradYear: integer(),
@@ -81,13 +85,38 @@ export const student = pgTable(
     ]
 );
 
-export const studentRelations = relations(student, ({ one }) => ({
-    college: one(college, {
-        fields: [student.collegeId],
-        references: [college.id],
-    }),
-}));
+export const job = pgTable(
+    'job',
+    {
+        id: serial().primaryKey().notNull(),
+        title: text().notNull(),
+        description: text().notNull(),
+        location: text(),
+        salary: text(),
+        jobType: jobType().notNull(),
+        jobMode: jobMode().notNull(),
+        companyId: integer().notNull(),
+        createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`),
+        updatedAt: timestamp({ precision: 3, mode: 'string' }),
+    },
+    (table) => [
+        foreignKey({
+            columns: [table.companyId],
+            foreignColumns: [company.id],
+            name: 'Job_companyId_fkey',
+        })
+            .onUpdate('cascade')
+            .onDelete('cascade'),
+    ]
+);
 
-export const collegeRelations = relations(college, ({ many }) => ({
-    students: many(student),
-}));
+// export const studentRelations = relations(student, ({ one }) => ({
+//     college: one(college, {
+//         fields: [student.collegeId],
+//         references: [college.id],
+//     }),
+// }));
+
+// export const collegeRelations = relations(college, ({ many }) => ({
+//     students: many(student),
+// }));

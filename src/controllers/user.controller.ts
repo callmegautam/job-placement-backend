@@ -171,7 +171,7 @@ export const getMatchingJobs = asyncHandler(async (req: Request, res: Response) 
 
     const matchingJobs = allJobs
         .map((job) => {
-            const jobSkills = job.requiredSkills || []; // ensure your schema supports this
+            const jobSkills = job.requiredSkills || []; // ensure schema supports this
             const matches = jobSkills.filter((skill) =>
                 skillSet.has(skill as typeof skillSet extends Set<infer T> ? T : never)
             );

@@ -140,23 +140,23 @@ export const job = pgTable(
     ]
 );
 
-export const jobSkill = pgTable(
-    'jobSkill',
-    {
-        jobId: integer().notNull(),
-        skill: skillsEnum(),
-    },
-    (table) => ({
-        pk: primaryKey({ columns: [table.jobId, table.skill] }),
-        fk_job: foreignKey({
-            columns: [table.jobId],
-            foreignColumns: [job.id],
-            name: 'jobSkill_jobId_fkey',
-        })
-            .onUpdate('cascade')
-            .onDelete('cascade'),
-    })
-);
+// export const jobSkill = pgTable(
+//     'jobSkill',
+//     {
+//         jobId: integer().notNull(),
+//         skill: skillsEnum(),
+//     },
+//     (table) => ({
+//         pk: primaryKey({ columns: [table.jobId, table.skill] }),
+//         fk_job: foreignKey({
+//             columns: [table.jobId],
+//             foreignColumns: [job.id],
+//             name: 'jobSkill_jobId_fkey',
+//         })
+//             .onUpdate('cascade')
+//             .onDelete('cascade'),
+//     })
+// );
 
 export const studentSkill = pgTable(
     'studentSkill',

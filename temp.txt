@@ -1,0 +1,23 @@
+add index in routes
+
+
+
+📁 db
+ └── 📁schema
+     ├── enums.ts
+     ├── student.ts
+     ├── company.ts
+     ├── job.ts
+     ├── college.ts
+     └── index.ts
+
+
+
+export * from './enums';
+export * from './student';
+export * from './company';
+export * from './job';
+export * from './college';
+
+
+

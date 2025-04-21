@@ -1,7 +1,7 @@
 import { cookieOptions } from '@/config/cookies';
 import type { Request, Response } from 'express';
 import db from '@/db';
-import { student } from '@/db/schema';
+import { job, student, studentSkill } from '@/db/schema';
 import asyncHandler from '@/utils/asyncHandler';
 import { generateToken } from '@/utils/jwt';
 import { loginUserSchema, registerUserSchema, updateUserSchema } from '@/validators/user.validator';
@@ -141,5 +141,56 @@ export const getStudentByUsername = asyncHandler(async (req: Request, res: Respo
         success: true,
         message: 'Student fetched successfully',
         data: removePassword(existingStudent[0]),
+    });
+});
+
+export const getMatchingJobs = asyncHandler(async (req: Request, res: Response) => {
+    const studentId = Number(req.params.id);
+
+    if (!studentId || isNaN(studentId)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Valid student ID is required',
+            data: null,
+        });
+    }
+
+    const [user] = await db.select().from(student).where(eq(student.id, studentId));
+    if (!user) {
+        return res.status(404).json({
+            success: false,
+            message: 'Student not found',
+            data: null,
+        });
+    }
+
+    const userSkills = await db.select().from(studentSkill).where(eq(studentSkill.studentId, studentId));
+    const skillSet = new Set(userSkills.map((s) => s.skill));
+
+    const allJobs = await db.select().from(job);
+
+    const matchingJobs = allJobs
+        .map((job) => {
+            const jobSkills = job.requiredSkills || []; // ensure your schema supports this
+            const matches = jobSkills.filter((skill) =>
+                skillSet.has(skill as typeof skillSet extends Set<infer T> ? T : never)
+            );
+            return {
+                ...job,
+                matchScore: matches.length,
+            };
+        })
+        .filter((job) => job.matchScore > 0)
+        .sort((a, b) => {
+            if (b.matchScore === a.matchScore) {
+                return new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime();
+            }
+            return b.matchScore - a.matchScore;
+        });
+
+    return res.status(200).json({
+        success: true,
+        message: 'Matching jobs fetched successfully',
+        data: matchingJobs,
     });
 });

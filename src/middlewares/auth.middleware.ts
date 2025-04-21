@@ -1,8 +1,8 @@
 import { verifyToken } from '@/utils/jwt';
-import { Response, Request } from 'express';
+import { Response, Request, NextFunction } from 'express';
 
-export const authMiddleware = (req: Request, res: Response, next: Function) => {
-    const token = req.cookies.authorization;
+export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+    const token = req.cookies.authorization || req.headers.authorization?.replace('Bearer ', '');
 
     if (!token) {
         return res.status(401).json({ success: false, message: 'Unauthorized', data: null });

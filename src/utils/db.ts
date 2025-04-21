@@ -1,5 +1,5 @@
 import db from '@/db';
-import { company, student } from '@/db/schema';
+import { company, skillsEnum, student } from '@/db/schema';
 import { and, eq, or, sql } from 'drizzle-orm';
 
 export const isStudentExist = async (email: string, username: string) => {
@@ -26,8 +26,6 @@ export const isCompanyExist = async (email: string, domain: string) => {
     return false;
 };
 
-// EXTRA FUNCTIONS
-
 export const isEmailOrUsernameTaken = async (email: string, username: string, excludeId?: number) => {
     return await db
         .select()
@@ -50,4 +48,8 @@ export const isEmailOrDomainTaken = async (email: string, domain: string, exclud
                 and(eq(company.domain, domain), sql`${company.id} != ${excludeId}`)
             )
         );
+};
+
+export const allSkills = async () => {
+    return Array.isArray(skillsEnum.enumValues) ? skillsEnum.enumValues : [];
 };

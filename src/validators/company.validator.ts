@@ -1,5 +1,5 @@
 import { z } from 'zod';
-
+import { verificationStatus } from '@/db/schema';
 export const registerCompanySchema = z.object({
     companyName: z
         .string({ required_error: 'Company name is required' })
@@ -37,5 +37,5 @@ export const updateCompanySchema = z.object({
     linkedinUrl: z.string().url().optional(),
     logoUrl: z.string().url().optional(),
     isVerified: z.boolean().optional(),
-    verificationStatus: z.enum(['PENDING', 'VERIFIED', 'REJECTED']).optional(),
+    verificationStatus: z.enum([...verificationStatus.enumValues]).optional(),
 });

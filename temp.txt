@@ -21,3 +21,6 @@ export * from './college';
 
 
 
+add optionals to update validation in student and company
+
+

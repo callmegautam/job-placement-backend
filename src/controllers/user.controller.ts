@@ -1,11 +1,11 @@
 import { cookieOptions } from '@/config/cookies';
 import type { Request, Response } from 'express';
 import db from '@/db';
-import { job, jobApplication, student, studentSkill } from '@/db/schema';
+import { job, jobApplication, skillsEnum, student, studentSkill } from '@/db/schema';
 import asyncHandler from '@/utils/asyncHandler';
 import { generateToken } from '@/utils/jwt';
 import { loginUserSchema, registerUserSchema, updateUserSchema } from '@/validators/user.validator';
-import { and, desc, eq, or, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, or, sql } from 'drizzle-orm';
 import { isEmailOrUsernameTaken, isStudentExist } from '@/utils/db';
 import { removePassword } from '@/utils/others';
 
@@ -246,5 +246,60 @@ export const applyToJob = asyncHandler(async (req: Request, res: Response) => {
         success: true,
         message: 'Application submitted',
         data: applied,
+    });
+});
+
+export const addSkillsToStudent = asyncHandler(async (req: Request, res: Response) => {
+    const studentId = Number(res.locals.user.id);
+    const { skills } = req.body;
+
+    if (!studentId || isNaN(studentId)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid student ID',
+            data: null,
+        });
+    }
+
+    if (!Array.isArray(skills) || skills.length === 0) {
+        return res.status(400).json({
+            success: false,
+            message: 'Skills array is required',
+            data: null,
+        });
+    }
+
+    const [studentExists] = await db.select().from(student).where(eq(student.id, studentId));
+    if (!studentExists) {
+        return res.status(404).json({
+            success: false,
+            message: 'Student not found',
+            data: null,
+        });
+    }
+
+    const validSkills = skillsEnum.enumValues;
+    const validInputSkills = skills.filter((skill) => validSkills.includes(skill));
+    if (validInputSkills.length === 0) {
+        return res.status(400).json({
+            success: false,
+            message: 'No valid skills provided',
+            data: null,
+        });
+    }
+
+    await db.delete(studentSkill).where(eq(studentSkill.studentId, studentId));
+
+    await db.insert(studentSkill).values(
+        validInputSkills.map((skill) => ({
+            studentId,
+            skill,
+        }))
+    );
+
+    return res.status(200).json({
+        success: true,
+        message: 'Skills added to student successfully',
+        data: validInputSkills,
     });
 });

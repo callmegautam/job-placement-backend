@@ -4,7 +4,6 @@ export const createJobSchema = z.object({
     title: z.string(),
     description: z.string(),
     location: z.string(),
-    // salary: z.(),
     type: z.string(),
     companyId: z.number(),
 });

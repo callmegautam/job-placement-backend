@@ -1,7 +1,7 @@
 import { cookieOptions } from '@/config/cookies';
 import type { Request, Response } from 'express';
 import db from '@/db';
-import { company, jobApplication, student } from '@/db/schema';
+import { company, job, jobApplication, student } from '@/db/schema';
 import asyncHandler from '@/utils/asyncHandler';
 import { generateToken } from '@/utils/jwt';
 import {
@@ -9,7 +9,7 @@ import {
     loginCompanySchema,
     updateCompanySchema,
 } from '@/validators/company.validator';
-import { and, eq, is, or, sql } from 'drizzle-orm';
+import { and, desc, eq, is, or, sql } from 'drizzle-orm';
 import { isCompanyExist, isEmailOrDomainTaken } from '@/utils/db';
 import { removePassword } from '@/utils/others';
 
@@ -116,7 +116,7 @@ export const getCompanyById = asyncHandler(async (req: Request, res: Response) =
 });
 
 export const updateCompany = asyncHandler(async (req: Request, res: Response) => {
-    const id = Number(req.params?.id);
+    const id = Number(res.locals.user.id);
     if (!id || isNaN(id)) {
         return res.status(400).json({
             success: false,
@@ -197,5 +197,31 @@ export const updateApplicationStatus = asyncHandler(async (req: Request, res: Re
         success: true,
         message: 'Application status updated',
         data: updated,
+    });
+});
+
+export const getJobs = asyncHandler(async (req: Request, res: Response) => {
+    const companyId = Number(res.locals.user.id);
+    if (!companyId || isNaN(companyId)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid company ID',
+            data: null,
+        });
+    }
+
+    const jobs = await db
+        .select({
+            job: job,
+            company: company,
+        })
+        .from(job)
+        .where(eq(job.companyId, companyId))
+        .orderBy(desc(job.createdAt));
+
+    return res.status(200).json({
+        success: true,
+        message: 'Jobs fetched successfully',
+        data: jobs,
     });
 });

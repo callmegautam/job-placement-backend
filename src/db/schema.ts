@@ -183,7 +183,7 @@ export const studentSkill = pgTable(
         skill: skillsEnum(),
     },
     (table) => ({
-        pk: primaryKey({ columns: [table.studentId, table.skill] }),
+        // pk: primaryKey({ columns: [table.studentId, table.skill] }),
         fk_student: foreignKey({
             columns: [table.studentId],
             foreignColumns: [student.id],

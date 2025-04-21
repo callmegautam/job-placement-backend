@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import db from '@/db';
 import { job, company } from '@/db/schema';
 import asyncHandler from '@/utils/asyncHandler';
-import { eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { createJobSchema, updateJobSchema } from '@/validators/job.validator';
 
 // Create a Job
@@ -29,7 +29,8 @@ export const createJob = asyncHandler(async (req: Request, res: Response) => {
 
 // Get All Jobs
 export const getJobs = asyncHandler(async (req: Request, res: Response) => {
-    const jobs = await db.select().from(job);
+    const jobs = await db.select().from(job).orderBy(desc(job.createdAt));
+
     return res.status(200).json({
         success: true,
         message: 'Jobs fetched successfully',

@@ -30,6 +30,8 @@ app.get('/', (_: Request, res: Response) => {
     });
 });
 
+console.log(`Running in ${env.NODE_ENV} mode`);
+
 // Routes
 import userRoute from './routes/user.route';
 import companyRoute from './routes/company.route';

@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import db from '@/db';
-import { job, company } from '@/db/schema';
+import { job, company, jobApplication } from '@/db/schema';
 import asyncHandler from '@/utils/asyncHandler';
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { createJobSchema, updateJobSchema } from '@/validators/job.validator';
 
 // Create a Job

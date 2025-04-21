@@ -14,4 +14,7 @@ router.get('/id/:id', UserController.getStudentById);
 router.get('/username/:username', UserController.getStudentByUsername);
 router.get('/id/:id/skills', SkillController.getSkillsByStudentId);
 router.get('/id/:id/matching-jobs', UserController.getMatchingJobs);
+router.post('/apply/:jobId', authMiddleware, UserController.applyToJob);
+router.get('/applications', UserController.getStudentApplications);
+
 export default router;

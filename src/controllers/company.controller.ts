@@ -1,7 +1,7 @@
 import { cookieOptions } from '@/config/cookies';
 import type { Request, Response } from 'express';
 import db from '@/db';
-import { company } from '@/db/schema';
+import { company, jobApplication, student } from '@/db/schema';
 import asyncHandler from '@/utils/asyncHandler';
 import { generateToken } from '@/utils/jwt';
 import {
@@ -153,5 +153,49 @@ export const updateCompany = asyncHandler(async (req: Request, res: Response) =>
         success: true,
         message: 'Company updated successfully',
         data: removePassword(updatedCompany[0]),
+    });
+});
+
+export const getApplicants = asyncHandler(async (req: Request, res: Response) => {
+    const jobId = Number(req.params.jobId);
+
+    if (!jobId || isNaN(jobId)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid job ID',
+            data: null,
+        });
+    }
+
+    const applicants = await db
+        .select({
+            application: jobApplication,
+            student: student,
+        })
+        .from(jobApplication)
+        .where(eq(jobApplication.jobId, jobId))
+        .innerJoin(student, eq(jobApplication.studentId, student.id));
+
+    return res.status(200).json({
+        success: true,
+        message: 'Applicants fetched',
+        data: applicants,
+    });
+});
+
+export const updateApplicationStatus = asyncHandler(async (req: Request, res: Response) => {
+    const id = Number(req.params.applicationId);
+    const status = req.body.status; // 'SHORTLISTED', 'REJECTED', 'HIRED'
+
+    const [updated] = await db
+        .update(jobApplication)
+        .set({ status })
+        .where(eq(jobApplication.id, id))
+        .returning();
+
+    return res.status(200).json({
+        success: true,
+        message: 'Application status updated',
+        data: updated,
     });
 });

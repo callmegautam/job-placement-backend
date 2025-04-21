@@ -1,11 +1,11 @@
 import { cookieOptions } from '@/config/cookies';
 import type { Request, Response } from 'express';
 import db from '@/db';
-import { job, student, studentSkill } from '@/db/schema';
+import { job, jobApplication, student, studentSkill } from '@/db/schema';
 import asyncHandler from '@/utils/asyncHandler';
 import { generateToken } from '@/utils/jwt';
 import { loginUserSchema, registerUserSchema, updateUserSchema } from '@/validators/user.validator';
-import { and, eq, or, sql } from 'drizzle-orm';
+import { and, desc, eq, or, sql } from 'drizzle-orm';
 import { isEmailOrUsernameTaken, isStudentExist } from '@/utils/db';
 import { removePassword } from '@/utils/others';
 
@@ -192,5 +192,59 @@ export const getMatchingJobs = asyncHandler(async (req: Request, res: Response) 
         success: true,
         message: 'Matching jobs fetched successfully',
         data: matchingJobs,
+    });
+});
+
+export const getStudentApplications = asyncHandler(async (req: Request, res: Response) => {
+    const studentId = Number(res.locals.user.id);
+
+    if (!studentId || isNaN(studentId)) {
+        return res.status(400).json({ success: false, message: 'Invalid student ID', data: null });
+    }
+
+    const applications = await db
+        .select({
+            application: jobApplication,
+            job: job,
+        })
+        .from(jobApplication)
+        .where(eq(jobApplication.studentId, studentId))
+        .innerJoin(job, eq(jobApplication.jobId, job.id))
+        .orderBy(desc(jobApplication.createdAt));
+
+    return res.status(200).json({
+        success: true,
+        message: 'Applications fetched',
+        data: applications,
+    });
+});
+
+export const applyToJob = asyncHandler(async (req: Request, res: Response) => {
+    const studentId = Number(res.locals.user.id);
+    const jobId = Number(req.params?.jobId);
+
+    if (!studentId || isNaN(studentId)) {
+        return res.status(400).json({ success: false, message: 'Invalid student ID', data: null });
+    }
+
+    if (!jobId || isNaN(jobId)) {
+        return res.status(400).json({ success: false, message: 'Invalid job ID', data: null });
+    }
+
+    const existing = await db
+        .select()
+        .from(jobApplication)
+        .where(and(eq(jobApplication.studentId, studentId), eq(jobApplication.jobId, jobId)));
+
+    if (existing.length > 0) {
+        return res.status(400).json({ success: false, message: 'Already applied', data: null });
+    }
+
+    const [applied] = await db.insert(jobApplication).values({ studentId, jobId }).returning();
+
+    return res.status(200).json({
+        success: true,
+        message: 'Application submitted',
+        data: applied,
     });
 });

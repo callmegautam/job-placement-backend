@@ -22,6 +22,12 @@ export const verificationStatus = pgEnum('VerificationStatus', [
 
 export const jobType = pgEnum('JobType', ['FULL_TIME', 'PART_TIME', 'INTERNSHIP', 'CONTRACT']);
 export const jobMode = pgEnum('JobMode', ['REMOTE', 'ONSITE', 'HYBRID']);
+export const jobApplicationStatusEnum = pgEnum('job_application_status', [
+    'APPLIED',
+    'SHORTLISTED',
+    'REJECTED',
+    'HIRED',
+]);
 export const course = pgEnum('Course', ['BCA', 'BSc_CS', 'BTech', 'MCA', 'MTech', 'Diploma_CS', 'Other']);
 export const skillsEnum = pgEnum('Skill', [
     'C',
@@ -139,6 +145,18 @@ export const job = pgTable(
             .onDelete('cascade'),
     ]
 );
+
+export const jobApplication = pgTable('job_application', {
+    id: serial('id').primaryKey(),
+    studentId: integer('student_id')
+        .notNull()
+        .references(() => student.id, { onDelete: 'cascade' }),
+    jobId: integer('job_id')
+        .notNull()
+        .references(() => job.id, { onDelete: 'cascade' }),
+    status: text('status').$type<'APPLIED' | 'SHORTLISTED' | 'REJECTED' | 'HIRED'>().default('APPLIED'),
+    createdAt: timestamp('created_at', { mode: 'string', precision: 3 }).defaultNow(),
+});
 
 // export const jobSkill = pgTable(
 //     'jobSkill',

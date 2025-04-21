@@ -3,182 +3,143 @@ import type { Request, Response } from 'express';
 import db from '@/db';
 import { student } from '@/db/schema';
 import asyncHandler from '@/utils/asyncHandler';
-import { isUserExists } from '@/utils/db';
 import { generateToken } from '@/utils/jwt';
 import { loginUserSchema, registerUserSchema, updateUserSchema } from '@/validators/user.validator';
 import { and, eq, or, sql } from 'drizzle-orm';
+import { isEmailOrUsernameTaken, isStudentExist } from '@/utils/db';
+import { removePassword } from '@/utils/others';
 
-export const registerUser = asyncHandler(async (req: Request, res: Response) => {
-    const { username, password, email, name } = registerUserSchema.parse(req.body);
-    const userExists = await isUserExists(username, email);
+export const registerStudent = asyncHandler(async (req: Request, res: Response) => {
+    const data = registerUserSchema.parse(req.body);
+    const existingStudent = await isStudentExist(data.email, data.username);
 
-    if (userExists) {
-        return res.status(400).json({ success: false, message: 'User already exists', data: null });
+    if (existingStudent) {
+        return res.status(400).json({ success: false, message: 'Student already exists', data: null });
     }
 
-    const user = await db
-        .insert(student)
-        .values({
-            username,
-            password,
-            email,
-            name,
-        })
-        .returning();
+    const newStudent = await db.insert(student).values(data).returning();
 
-    // console.log(user);
-    const { password: _, ...userData } = user[0];
-
-    return res.status(200).json({ success: true, message: 'User created successfully', data: userData });
-});
-
-export const loginUser = asyncHandler(async (req: Request, res: Response) => {
-    const { email, password } = loginUserSchema.parse(req.body);
-
-    const user = await db.select().from(student).where(eq(student.email, email));
-
-    if (user.length === 0) {
-        return res.status(400).json({ success: false, message: 'User not found', data: null });
-    }
-
-    const userData = user[0];
-
-    if (userData.password !== password) {
-        return res.status(400).json({ success: false, message: 'Invalid credentials', data: null });
-    }
-
-    const token = generateToken({ id: userData.id, role: 'STUDENT' });
-
-    const { password: _, ...userDataWithoutPassword } = userData;
-
-    return res.status(200).cookie('authorization', token, cookieOptions).json({
+    return res.status(200).json({
         success: true,
-        message: 'User logged in successfully',
-        data: userDataWithoutPassword,
-        token,
+        message: 'Student created successfully',
+        data: removePassword(newStudent[0]),
     });
 });
 
-export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
-    res.clearCookie('authorization');
-    return res.status(200).json({ success: true, message: 'User logged out successfully', data: null });
-});
+export const loginStudent = asyncHandler(async (req: Request, res: Response) => {
+    const data = loginUserSchema.parse(req.body);
 
-export const getUsers = asyncHandler(async (req: Request, res: Response) => {
-    const users = await db.select().from(student);
-    const usersWithOutPassword = users.map(({ password, ...user }) => user);
+    const existingStudent = await isStudentExist(data.email, data.password);
+
+    if (!existingStudent) {
+        return res.status(400).json({ success: false, message: 'Student not found', data: null });
+    }
+
+    if (existingStudent.password !== data.password) {
+        return res.status(400).json({ success: false, message: 'Invalid credentials', data: null });
+    }
+
+    const token = generateToken({ id: existingStudent.id, role: 'STUDENT' });
+
     return res
         .status(200)
-        .json({ success: true, message: 'Users fetched successfully', data: usersWithOutPassword });
+        .cookie('authorization', token, cookieOptions)
+        .json({
+            success: true,
+            message: 'Student logged in successfully',
+            data: removePassword(existingStudent),
+            token,
+        });
 });
 
-export const getUserById = asyncHandler(async (req: Request, res: Response) => {
+export const logoutStudent = asyncHandler(async (req: Request, res: Response) => {
+    res.clearCookie('authorization');
+    return res.status(200).json({ success: true, message: 'Student logged out successfully', data: null });
+});
+
+export const getStudents = asyncHandler(async (req: Request, res: Response) => {
+    const students = await db.select().from(student);
+    const studentsWithOutPassword = students.map(({ password, ...student }) => student);
+    return res
+        .status(200)
+        .json({ success: true, message: 'Students fetched successfully', data: studentsWithOutPassword });
+});
+
+export const getStudentById = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params?.id);
-    if (!id) {
-        return res.status(400).json({ success: false, message: 'User id is required', data: null });
+
+    if (isNaN(id) || !id) {
+        return res.status(400).json({ success: false, message: 'Valid student id is required', data: null });
     }
-    if (isNaN(id)) {
-        return res.status(400).json({ success: false, message: 'User id is not a number', data: null });
+
+    const existingStudent = await db.select().from(student).where(eq(student.id, id));
+
+    if (existingStudent.length === 0) {
+        return res.status(404).json({ success: false, message: 'Student not found', data: null });
     }
-    const [user] = await db.select().from(student).where(eq(student.id, id));
-    if (!user) {
-        return res.status(404).json({ success: false, message: 'User not found', data: null });
-    }
-    const { password: _, ...userData } = user;
-    return res.status(200).json({ success: true, message: 'User fetched successfully', data: user });
+
+    return res.status(200).json({
+        success: true,
+        message: 'student fetched successfully',
+        data: removePassword(existingStudent[0]),
+    });
 });
 
-export const updateUser = asyncHandler(async (req: Request, res: Response) => {
+export const updateStudent = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params?.id);
 
     if (!id || isNaN(id)) {
         return res.status(400).json({
             success: false,
-            message: 'Valid user id is required',
+            message: 'Valid student id is required',
             data: null,
         });
     }
 
-    const {
-        name,
-        email,
-        username,
-        course,
-        admissionYear,
-        currentYear,
-        gradYear,
-        collegeId,
-        githubUrl,
-        resumeUrl,
-        avatarUrl,
-    } = updateUserSchema.parse(req.body);
+    const data = updateUserSchema.parse(req.body);
 
-    const [user] = await db.select().from(student).where(eq(student.id, id));
+    const students = await db.select().from(student).where(eq(student.id, id));
 
-    if (!user) {
+    if (!students) {
         return res.status(404).json({
             success: false,
-            message: 'User not found',
+            message: 'Student not found',
             data: null,
         });
     }
 
-    const existing = await db
-        .select()
-        .from(student)
-        .where(
-            or(
-                and(eq(student.email, email), sql`${student.id} != ${id}`),
-                and(eq(student.username, username), sql`${student.id} != ${id}`)
-            )
-        );
-
-    if (existing.length > 0) {
+    const existingStudent = await isEmailOrUsernameTaken(data.email, data.username, id);
+    if (existingStudent.length > 0) {
         return res.status(409).json({
             success: false,
-            message: 'Email or username is already taken by another user',
+            message: 'Email or username is already taken by another student',
             data: null,
         });
     }
-
-    const [userData] = await db
-        .update(student)
-        .set({
-            name,
-            email,
-            username,
-            course,
-            admissionYear,
-            currentYear,
-            gradYear,
-            collegeId,
-            githubUrl,
-            resumeUrl,
-            avatarUrl,
-        })
-        .where(eq(student.id, id))
-        .returning();
+    const updatedStudent = await db.update(student).set(data).where(eq(student.id, id)).returning();
 
     return res.status(200).json({
         success: true,
         message: 'User updated successfully',
-        data: userData,
+        data: removePassword(updatedStudent[0]),
     });
 });
 
-export const getUserByUsername = asyncHandler(async (req: Request, res: Response) => {
-    const username = req.params?.username;
+export const getStudentByUsername = asyncHandler(async (req: Request, res: Response) => {
+    const username = req.params?.username as string;
     if (!username) {
-        return res.status(400).json({
-            success: false,
-            message: 'Username is required',
-            data: null,
-        });
+        return res.status(400).json({ success: false, message: 'Username is required', data: null });
     }
-    const [user] = await db.select().from(student).where(eq(student.username, username));
-    if (!user) {
-        return res.status(404).json({ success: false, message: 'User not found', data: null });
+
+    const existingStudent = await db.select().from(student).where(eq(student.username, username));
+
+    if (existingStudent.length === 0) {
+        return res.status(404).json({ success: false, message: 'Student not found', data: null });
     }
-    const { password: _, ...userData } = user;
-    return res.status(200).json({ success: true, message: 'User fetched successfully', data: userData });
+
+    return res.status(200).json({
+        success: true,
+        message: 'Student fetched successfully',
+        data: removePassword(existingStudent[0]),
+    });
 });

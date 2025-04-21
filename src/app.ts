@@ -30,15 +30,12 @@ app.get('/', (_: Request, res: Response) => {
     });
 });
 
-console.log(`Running in ${env.NODE_ENV} mode`);
-
 // Routes
-import userRoute from './routes/user.route';
-import companyRoute from './routes/company.route';
-import skillRoute from './routes/skill.route';
-app.use('/api/v1/users', userRoute);
-app.use('/api/v1/companies', companyRoute);
-app.use('/api/v1/skills', skillRoute);
+import routes from './routes';
+
+app.use('/api/v1/students', routes.studentRoutes);
+app.use('/api/v1/companies', routes.companyRoutes);
+app.use('/api/v1/skills', routes.skillRoutes);
 
 app.use('*', (_: Request, res: Response) => {
     return res.status(404).json({

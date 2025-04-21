@@ -152,6 +152,6 @@ export const updateCompany = asyncHandler(async (req: Request, res: Response) =>
     return res.status(200).json({
         success: true,
         message: 'Company updated successfully',
-        data: updatedCompany,
+        data: removePassword(updatedCompany[0]),
     });
 });

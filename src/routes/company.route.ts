@@ -7,6 +7,6 @@ router.get('/', CompanyController.getCompanies);
 router.post('/register', CompanyController.registerCompany);
 router.post('/login', CompanyController.loginCompany);
 router.post('/logout', CompanyController.logoutCompany);
-router.get('/:id', CompanyController.getCompanyById);
-router.put('/:id', CompanyController.updateCompany);
+router.get('/id/:id', CompanyController.getCompanyById);
+router.put('/id/:id', CompanyController.updateCompany);
 export default router;

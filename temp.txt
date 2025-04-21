@@ -24,3 +24,26 @@ export * from './college';
 add optionals to update validation in student and company
 
 
+const id = Number(req.params?.id);
+if (isNaN(id)) {
+    return res.status(400).json({
+        success: false,
+        message: 'Valid user id is required',
+        data: null,
+    });
+}
+
+
+const isEmailOrUsernameTaken = async (email: string, username: string, excludeId?: number) => {
+    return await db
+        .select()
+        .from(student)
+        .where(
+            or(
+                and(eq(student.email, email), sql`${student.id} != ${excludeId}`),
+                and(eq(student.username, username), sql`${student.id} != ${excludeId}`)
+            )
+        );
+};
+
+

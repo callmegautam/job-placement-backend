@@ -110,6 +110,14 @@ export const getCompanyById = asyncHandler(async (req: Request, res: Response) =
 
     const [companyData] = await db.select().from(company).where(eq(company.id, id));
 
+    if (!companyData) {
+        return res.status(404).json({
+            success: false,
+            message: 'Company not found',
+            data: null,
+        });
+    }
+
     const { password: _, ...companyDataWithoutPassword } = companyData;
 
     return res.status(200).json({

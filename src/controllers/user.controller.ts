@@ -81,6 +81,9 @@ export const getUserById = asyncHandler(async (req: Request, res: Response) => {
         return res.status(400).json({ success: false, message: 'User id is not a number', data: null });
     }
     const [user] = await db.select().from(student).where(eq(student.id, id));
+    if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found', data: null });
+    }
     const { password: _, ...userData } = user;
     return res.status(200).json({ success: true, message: 'User fetched successfully', data: user });
 });
@@ -173,6 +176,9 @@ export const getUserByUsername = asyncHandler(async (req: Request, res: Response
         });
     }
     const [user] = await db.select().from(student).where(eq(student.username, username));
+    if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found', data: null });
+    }
     const { password: _, ...userData } = user;
     return res.status(200).json({ success: true, message: 'User fetched successfully', data: userData });
 });

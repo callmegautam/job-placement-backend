@@ -13,4 +13,5 @@ router.put('/update', authMiddleware, UserController.updateStudent);
 router.get('/id/:id', UserController.getStudentById);
 router.get('/username/:username', UserController.getStudentByUsername);
 router.get('/id/:id/skills', SkillController.getSkillsByStudentId);
+router.get('/id/:id/matching-jobs', UserController.getMatchingJobs);
 export default router;

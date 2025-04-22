@@ -130,7 +130,7 @@ export const job = pgTable(
         jobType: jobType(),
         jobMode: jobMode(),
         companyId: integer(),
-        requiredSkills: skillsEnum().array(),
+        requiredSkills: skillsEnum().array().default([]),
         createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`),
         // createdAt: timestamp('created_at').defaultNow(),
         updatedAt: timestamp({ precision: 3, mode: 'string' }),

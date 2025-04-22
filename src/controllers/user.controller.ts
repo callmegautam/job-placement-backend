@@ -188,6 +188,14 @@ export const getMatchingJobs = asyncHandler(async (req: Request, res: Response) 
             return b.matchScore - a.matchScore;
         });
 
+    if (!matchingJobs || matchingJobs.length === 0) {
+        return res.status(404).json({
+            success: false,
+            message: 'No matching jobs found',
+            data: null,
+        });
+    }
+
     return res.status(200).json({
         success: true,
         message: 'Matching jobs fetched successfully',
@@ -229,6 +237,11 @@ export const applyToJob = asyncHandler(async (req: Request, res: Response) => {
 
     if (!jobId || isNaN(jobId)) {
         return res.status(400).json({ success: false, message: 'Invalid job ID', data: null });
+    }
+
+    const isStudent = await db.select().from(student).where(eq(student.id, studentId));
+    if (!isStudent || isStudent.length === 0) {
+        return res.status(404).json({ success: false, message: 'Student not found', data: null });
     }
 
     const existing = await db

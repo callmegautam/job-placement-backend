@@ -12,6 +12,6 @@ router.get('/id/:id', CompanyController.getCompanyById);
 router.put('/update', authMiddleware, CompanyController.updateCompany);
 router.get('/job/:jobId/applicants', CompanyController.getApplicants);
 router.put('/application/:applicationId/status', authMiddleware, CompanyController.updateApplicationStatus);
-router.get('/jobs', CompanyController.getJobs);
+router.get('/jobs', authMiddleware, CompanyController.getJobs);
 
 export default router;

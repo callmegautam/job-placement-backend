@@ -176,6 +176,14 @@ export const getApplicants = asyncHandler(async (req: Request, res: Response) =>
         .where(eq(jobApplication.jobId, jobId))
         .innerJoin(student, eq(jobApplication.studentId, student.id));
 
+    if (!applicants || applicants.length === 0) {
+        return res.status(404).json({
+            success: false,
+            message: 'No applicants found',
+            data: null,
+        });
+    }
+
     return res.status(200).json({
         success: true,
         message: 'Applicants fetched',
@@ -216,8 +224,17 @@ export const getJobs = asyncHandler(async (req: Request, res: Response) => {
             company: company,
         })
         .from(job)
+        .innerJoin(company, eq(job.companyId, company.id))
         .where(eq(job.companyId, companyId))
         .orderBy(desc(job.createdAt));
+
+    if (!jobs || jobs.length === 0) {
+        return res.status(404).json({
+            success: false,
+            message: 'No jobs found',
+            data: null,
+        });
+    }
 
     return res.status(200).json({
         success: true,

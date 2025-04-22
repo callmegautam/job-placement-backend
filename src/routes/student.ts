@@ -1,24 +1,21 @@
 import { Router } from 'express';
-import * as UserController from '@/controllers/student';
-import * as SkillController from '@/controllers/skill';
-import { authMiddleware } from '@/middlewares/auth.middleware';
+import * as Student from '@/controllers/student';
+import { authMiddleware, authMiddlewareWithRole } from '@/middlewares/auth.middleware';
 
 const router = Router();
 
 // ? crud
-router.put('/update', authMiddleware, UserController.updateStudent);
+router.put('/update', authMiddlewareWithRole('STUDENT'), Student.updateStudent);
 
 // ? skill
-// todo : convert this into auth based not id based
-router.get('/id/:id/skills', SkillController.getSkillsByStudentId);
-router.post('/skills', authMiddleware, UserController.addSkillsToStudent);
+router.get('/skills', authMiddlewareWithRole('STUDENT'), Student.getStudentSkills);
+router.post('/skills', authMiddlewareWithRole('STUDENT'), Student.addSkillsToStudent);
 
 // ? jobs
-// todo : convert this into auth based not id based
-router.get('/id/:id/matching-jobs', UserController.getMatchingJobs);
-router.post('/apply/:jobId', authMiddleware, UserController.applyToJob);
+router.get('/matching-jobs', authMiddlewareWithRole('STUDENT'), Student.getMatchingJobs);
+router.post('/apply/:jobId', authMiddlewareWithRole('STUDENT'), Student.applyToJob);
 
 // ? applications
-router.get('/applications', authMiddleware, UserController.getStudentApplications);
+router.get('/applications', authMiddlewareWithRole('STUDENT'), Student.getStudentApplications);
 
 export default router;

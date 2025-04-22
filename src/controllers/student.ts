@@ -8,9 +8,10 @@ import { loginUserSchema, registerUserSchema, updateUserSchema } from '@/validat
 import { and, desc, eq, inArray, or, sql } from 'drizzle-orm';
 import { isEmailOrUsernameTaken, isStudentExist } from '@/utils/db';
 import { removePassword } from '@/utils/others';
+import { skillsSchema } from '@/validators/skills';
 
 export const updateStudent = asyncHandler(async (req: Request, res: Response) => {
-    const id = Number(req.params?.id);
+    const id = Number(res.locals.data.id);
 
     if (!id || isNaN(id)) {
         return res.status(400).json({
@@ -50,7 +51,7 @@ export const updateStudent = asyncHandler(async (req: Request, res: Response) =>
 });
 
 export const getMatchingJobs = asyncHandler(async (req: Request, res: Response) => {
-    const studentId = Number(req.params.id);
+    const studentId = Number(res.locals.data.id);
 
     if (!studentId || isNaN(studentId)) {
         return res.status(400).json({
@@ -109,7 +110,7 @@ export const getMatchingJobs = asyncHandler(async (req: Request, res: Response) 
 });
 
 export const getStudentApplications = asyncHandler(async (req: Request, res: Response) => {
-    const studentId = Number(res.locals.user.id);
+    const studentId = Number(res.locals.data.id);
 
     if (!studentId || isNaN(studentId)) {
         return res.status(400).json({ success: false, message: 'Invalid student ID', data: null });
@@ -133,7 +134,7 @@ export const getStudentApplications = asyncHandler(async (req: Request, res: Res
 });
 
 export const applyToJob = asyncHandler(async (req: Request, res: Response) => {
-    const studentId = Number(res.locals.user.id);
+    const studentId = Number(res.locals.data.id);
     const jobId = Number(req.params?.jobId);
 
     if (!studentId || isNaN(studentId)) {
@@ -168,8 +169,8 @@ export const applyToJob = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const addSkillsToStudent = asyncHandler(async (req: Request, res: Response) => {
-    const studentId = Number(res.locals.user.id);
-    const { skills } = req.body;
+    const studentId = Number(res.locals.data.id);
+    const { skills } = skillsSchema.parse(req.body);
 
     if (!studentId || isNaN(studentId)) {
         return res.status(400).json({
@@ -219,5 +220,44 @@ export const addSkillsToStudent = asyncHandler(async (req: Request, res: Respons
         success: true,
         message: 'Skills added to student successfully',
         data: validInputSkills,
+    });
+});
+
+export const getStudentSkills = asyncHandler(async (req: Request, res: Response) => {
+    const id = Number(res.locals.data.id);
+    if (!id || isNaN(id)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Valid student id is required',
+            data: null,
+        });
+    }
+
+    const existingStudent = await db.select().from(student).where(eq(student.id, id));
+
+    if (existingStudent.length === 0) {
+        return res.status(404).json({
+            success: false,
+            message: 'Student not found',
+            data: null,
+        });
+    }
+
+    const studentSkills = await db.select().from(studentSkill).where(eq(studentSkill.studentId, id));
+
+    if (!studentSkills || studentSkills.length === 0) {
+        return res.status(404).json({
+            success: false,
+            message: 'Skill not found',
+            data: null,
+        });
+    }
+
+    const skills = studentSkills.map((skillTable) => skillTable.skill);
+
+    return res.status(200).json({
+        success: true,
+        message: 'Skill fetched successfully',
+        data: skills,
     });
 });

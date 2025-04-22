@@ -10,7 +10,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
 
     try {
         const decoded = verifyToken(token);
-        res.locals.user = decoded;
+        res.locals.data = decoded;
         next();
     } catch (error) {
         console.log(error);
@@ -30,7 +30,19 @@ export const authMiddlewareWithRole = (role: string) => (req: Request, res: Resp
         if (typeof decoded !== 'object' || !('role' in decoded) || decoded.role !== role) {
             return res.status(401).json({ success: false, message: 'Unauthorized', data: null });
         }
-        res.locals.user = decoded;
+
+        if (decoded.role === role) {
+            return res
+                .status(403)
+                .json({
+                    success: false,
+                    message: 'You are not authorized to perform this action',
+                    data: null,
+                });
+        }
+
+        res.locals.data = decoded;
+
         next();
     } catch (error) {
         console.log(error);

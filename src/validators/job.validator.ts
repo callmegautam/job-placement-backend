@@ -14,7 +14,6 @@ export const createJobSchema = z.object({
     location: z.string().min(1, 'Location cannot be empty').max(100, 'Location is too long'),
     type: z.string(z.enum(jobType.enumValues)),
     requiredSkills: z.array(z.enum(skillsEnum.enumValues)),
-    companyId: z.number(),
 });
 
 export const updateJobSchema = z.object({

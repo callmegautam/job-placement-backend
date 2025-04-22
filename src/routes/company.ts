@@ -5,16 +5,20 @@ import { authMiddleware, authMiddlewareWithRole } from '@/middlewares/auth.middl
 const router = Router();
 
 // ? company
-router.put('/update', authMiddleware, Company.updateCompany);
+router.put('/update', authMiddlewareWithRole('COMPANY'), Company.updateCompany);
 
 // ? jobs
-router.post('/', authMiddlewareWithRole('COMPANY'), Company.createJob);
-router.put('/:id', authMiddlewareWithRole('COMPANY'), Company.updateJob);
-router.delete('/:id', authMiddlewareWithRole('COMPANY'), Company.deleteJob);
 router.get('/jobs', authMiddleware, Company.getJobs);
+router.post('/jobs', authMiddlewareWithRole('COMPANY'), Company.createJob);
+router.put('/jobs/id/:id', authMiddlewareWithRole('COMPANY'), Company.updateJob);
+router.delete('/jobs/id/:id', authMiddlewareWithRole('COMPANY'), Company.deleteJob);
 
 // ? applications
-router.get('/job/:jobId/applicants', Company.getApplicants);
-router.put('/application/:applicationId/status', authMiddleware, Company.updateApplicationStatus);
+router.get('/job/:id/applicants', authMiddlewareWithRole('COMPANY'), Company.getApplicants);
+router.put(
+    '/application/:applicationId/status',
+    authMiddlewareWithRole('COMPANY'),
+    Company.updateApplicationStatus
+);
 
 export default router;

@@ -3,6 +3,7 @@ import { company, job, jobApplication, student } from '@/db/schema';
 import asyncHandler from '@/utils/asyncHandler';
 import { isEmailOrDomainTaken } from '@/utils/db';
 import { removePassword } from '@/utils/others';
+import { statusSchema } from '@/validators/application';
 import { updateCompanySchema } from '@/validators/company.validator';
 import { createJobSchema, updateJobSchema } from '@/validators/job.validator';
 import { desc, eq } from 'drizzle-orm';
@@ -11,7 +12,8 @@ import type { Request, Response } from 'express';
 // ? COMPANY
 
 export const updateCompany = asyncHandler(async (req: Request, res: Response) => {
-    const id = Number(res.locals.user.id);
+    const id = Number(res.locals.data.id);
+
     if (!id || isNaN(id)) {
         return res.status(400).json({
             success: false,
@@ -55,8 +57,9 @@ export const updateCompany = asyncHandler(async (req: Request, res: Response) =>
 
 export const createJob = asyncHandler(async (req: Request, res: Response) => {
     const data = createJobSchema.parse(req.body);
+    const id = Number(res.locals.data.id);
 
-    const [companyData] = await db.select().from(company).where(eq(company.id, data.companyId));
+    const [companyData] = await db.select().from(company).where(eq(company.id, id));
     if (!companyData) {
         return res.status(404).json({
             success: false,
@@ -65,7 +68,9 @@ export const createJob = asyncHandler(async (req: Request, res: Response) => {
         });
     }
 
-    const [newJob] = await db.insert(job).values(data).returning();
+    const jobDetails = { ...data, companyId: id };
+
+    const [newJob] = await db.insert(job).values(jobDetails).returning();
 
     return res.status(201).json({
         success: true,
@@ -160,7 +165,7 @@ export const getApplicants = asyncHandler(async (req: Request, res: Response) =>
 
 export const updateApplicationStatus = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.applicationId);
-    const status = req.body.status; // 'SHORTLISTED', 'REJECTED', 'HIRED'
+    const status = statusSchema.parse(req.body).status;
 
     const [updated] = await db
         .update(jobApplication)
@@ -176,7 +181,7 @@ export const updateApplicationStatus = asyncHandler(async (req: Request, res: Re
 });
 
 export const getJobs = asyncHandler(async (req: Request, res: Response) => {
-    const companyId = Number(res.locals.user.id);
+    const companyId = Number(res.locals.data.id);
     if (!companyId || isNaN(companyId)) {
         return res.status(400).json({
             success: false,

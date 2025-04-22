@@ -23,9 +23,9 @@ export const verificationStatus = pgEnum('VerificationStatus', [
 export const jobType = pgEnum('JobType', ['FULL_TIME', 'PART_TIME', 'INTERNSHIP', 'CONTRACT']);
 export const jobMode = pgEnum('JobMode', ['REMOTE', 'ONSITE', 'HYBRID']);
 export const jobApplicationStatusEnum = pgEnum('job_application_status', [
-    'APPLIED',
     'SHORTLISTED',
     'REJECTED',
+    'APPLIED',
     'HIRED',
 ]);
 export const course = pgEnum('Course', ['BCA', 'BSc_CS', 'BTech', 'MCA', 'MTech', 'Diploma_CS', 'Other']);

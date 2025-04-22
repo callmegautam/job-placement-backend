@@ -119,6 +119,15 @@ export const deleteJob = asyncHandler(async (req: Request, res: Response) => {
         });
     }
 
+    const [oldJob] = await db.select().from(job).where(eq(job.id, id));
+    if (!oldJob) {
+        return res.status(404).json({
+            success: false,
+            message: 'Job not found',
+            data: null,
+        });
+    }
+
     await db.delete(job).where(eq(job.id, id));
 
     return res.status(200).json({
@@ -164,8 +173,26 @@ export const getApplicants = asyncHandler(async (req: Request, res: Response) =>
 });
 
 export const updateApplicationStatus = asyncHandler(async (req: Request, res: Response) => {
-    const id = Number(req.params.applicationId);
+    const id = Number(req.params.id);
     const status = statusSchema.parse(req.body).status;
+
+    if (!id || isNaN(id)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Valid application ID is required',
+            data: null,
+        });
+    }
+
+    const existingApplication = await db.select().from(jobApplication).where(eq(jobApplication.id, id));
+
+    if (!existingApplication || existingApplication.length === 0) {
+        return res.status(404).json({
+            success: false,
+            message: 'Application not found',
+            data: null,
+        });
+    }
 
     const [updated] = await db
         .update(jobApplication)

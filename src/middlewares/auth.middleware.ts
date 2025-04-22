@@ -31,14 +31,12 @@ export const authMiddlewareWithRole = (role: string) => (req: Request, res: Resp
             return res.status(401).json({ success: false, message: 'Unauthorized', data: null });
         }
 
-        if (decoded.role === role) {
-            return res
-                .status(403)
-                .json({
-                    success: false,
-                    message: 'You are not authorized to perform this action',
-                    data: null,
-                });
+        if (decoded.role != role) {
+            return res.status(403).json({
+                success: false,
+                message: 'You are not authorized to perform this action',
+                data: null,
+            });
         }
 
         res.locals.data = decoded;

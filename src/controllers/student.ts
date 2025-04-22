@@ -150,6 +150,11 @@ export const applyToJob = asyncHandler(async (req: Request, res: Response) => {
         return res.status(404).json({ success: false, message: 'Student not found', data: null });
     }
 
+    const existingJob = await db.select().from(job).where(eq(job.id, jobId));
+    if (!existingJob || existingJob.length === 0) {
+        return res.status(404).json({ success: false, message: 'Job not found', data: null });
+    }
+
     const existing = await db
         .select()
         .from(jobApplication)

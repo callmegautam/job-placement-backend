@@ -16,3 +16,5 @@ router.get('/students/username/:username', Admin.getStudentByUsername);
 // ? jobs
 router.get('/jobs', Admin.getJobs);
 router.get('/jobs/id/:id', Admin.getJobById);
+
+export default router;

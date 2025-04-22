@@ -5,7 +5,7 @@ import { authMiddleware, authMiddlewareWithRole } from '@/middlewares/auth.middl
 const router = Router();
 
 // ? crud
-router.put('/update', authMiddlewareWithRole('STUDENT'), Student.updateStudent);
+router.put('/', authMiddlewareWithRole('STUDENT'), Student.updateStudent);
 
 // ? skill
 router.get('/skills', authMiddlewareWithRole('STUDENT'), Student.getStudentSkills);

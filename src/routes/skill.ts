@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import * as skill from '@/controllers/skill';
+import * as Skill from '@/controllers/skill';
 
 const router = Router();
 
-router.get('/', skill.getSkills);
+router.get('/', Skill.getSkills);
 export default router;

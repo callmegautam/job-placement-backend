@@ -29,8 +29,7 @@ export const registerStudent = asyncHandler(async (req: Request, res: Response) 
 export const loginStudent = asyncHandler(async (req: Request, res: Response) => {
     const data = loginUserSchema.parse(req.body);
 
-    // TODO: BUG
-    const existingStudent = await isStudentExist(data.email, data.password);
+    const existingStudent = await isStudentExist(data.email, '');
 
     if (!existingStudent) {
         return res.status(400).json({ success: false, message: 'Student not found', data: null });
